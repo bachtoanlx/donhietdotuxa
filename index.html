@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Read Google Sheet</title>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 50%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        th:nth-child(1), td:nth-child(1) {
+            width: 300px; /* Đặt chiều rộng cho cột C2 */
+        }
+        th:nth-child(2), td:nth-child(2) {
+            width: 300px; /* Đặt chiều rộng cho cột D2 */
+        }
+    </style>
+    <script>
+        function initClient() {
+            gapi.client.init({
+                'apiKey': 'AIzaSyANdbEb_R9E-tXldeDDoMTRfFX54NECou4',
+                'discoveryDocs': ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
+            }).then(function() {
+                readCells();
+            });
+        }
+
+        function handleClientLoad() {
+            gapi.load('client', initClient);
+        }
+
+        function readCells() {
+            const params = {
+                spreadsheetId: '1DS0UweAQC4GMUbH7y9HuX5wlx_mKxrDTBCWDGs7cN4Y',
+                range: 'Sheet1!C2:D2', // Chỉ định phạm vi bao gồm C2 và D2
+            };
+
+            gapi.client.sheets.spreadsheets.values.get(params).then((response) => {
+                const values = response.result.values[0];
+                const cellC2 = values[0];
+                const cellD2 = values[1];
+                document.getElementById('cellC2').innerText = cellC2;
+                document.getElementById('cellD2').innerText = cellD2;
+            }, (reason) => {
+                console.error('Error: ' + reason.result.error.message);
+            });
+        }
+        // Hàm reload trang mỗi 5 giây
+        function reloadPage() {
+            setInterval(function() {
+                location.reload();
+            }, 5000); // 5000 milliseconds = 5 seconds
+        }
+    </script>
+</head>
+<body onload="handleClientLoad(); reloadPage();">
+    <div class="container">
+        <table>
+            <thead>
+                <tr>
+                    <th> Nhiệt độ (℃) </th>
+                    <th> Độ ẩm (%) </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="cellC2">Loading...</td>
+                    <td id="cellD2">Loading...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
