@@ -32,10 +32,10 @@
             background-color: #f2f2f2;
         }
         th:nth-child(1), td:nth-child(1) {
-            width: 300px; /* Đặt chiều rộng cho cột C2 */
+            width: 300px; /* Đặt chiều rộng cho cột A7 */
         }
         th:nth-child(2), td:nth-child(2) {
-            width: 300px; /* Đặt chiều rộng cho cột D2 */
+            width: 300px; /* Đặt chiều rộng cho cột B7 */
         }
     </style>
     <script>
@@ -55,24 +55,24 @@
         function readCells() {
             const params = {
                 spreadsheetId: '1DS0UweAQC4GMUbH7y9HuX5wlx_mKxrDTBCWDGs7cN4Y',
-                range: 'Sheet1!C2:D2', // Chỉ định phạm vi bao gồm C2 và D2
+                range: 'Sheet2!A7:B7', // Chỉ định phạm vi bao gồm A7 và B7
             };
 
             gapi.client.sheets.spreadsheets.values.get(params).then((response) => {
                 const values = response.result.values[0];
-                const cellC2 = values[0];
-                const cellD2 = values[1];
-                document.getElementById('cellC2').innerText = cellC2;
-                document.getElementById('cellD2').innerText = cellD2;
+                const cellA7 = values[0];
+                const cellB7 = values[1];
+                document.getElementById('cellA7').innerText = cellA7;
+                document.getElementById('cellB7').innerText = cellB7;
             }, (reason) => {
                 console.error('Error: ' + reason.result.error.message);
             });
         }
-        // Hàm reload trang mỗi 5 giây
+        // Hàm reload trang mỗi 15 giây
         function reloadPage() {
             setInterval(function() {
                 location.reload();
-            }, 10000); // 10000 milliseconds =     10 seconds
+            }, 15000); // 15000 milliseconds = 15 seconds
         }
     </script>
 </head>
@@ -87,8 +87,8 @@
             </thead>
             <tbody>
                 <tr>
-                    <td id="cellC2">Loading...</td>
-                    <td id="cellD2">Loading...</td>
+                    <td id="cellA7">Loading...</td>
+                    <td id="cellB7">Loading...</td>
                 </tr>
             </tbody>
         </table>
