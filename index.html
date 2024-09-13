@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Read Google Sheet</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" href="https://icons.iconarchive.com/icons/bokehlicia/captiva/48/cloud-icon.png">
+
+    <title>Weather measuring Tool</title>
     <script src="https://apis.google.com/js/api.js"></script>
     <style>
         body, html {
@@ -11,17 +14,32 @@
             justify-content: center;
             align-items: center;
             font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://st.quantrimang.com/photos/image/2019/10/30/hinh-nen-phong-canh-dep-3.jpg') no-repeat center center fixed; /* Thay thế 'your-image-url.jpg' bằng URL của ảnh nền */
+            background-size: cover;
+            filter: blur(1px); /* Làm mờ ảnh nền */
+            z-index: -1; /* Đặt ảnh nền ở phía sau nội dung */
         }
         .container {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            width: 50%;
+            width: 70%;
+            z-index: 1;
         }
         table {
             width: 100%;
             border-collapse: collapse;
+            background: white;
+            opacity: 0.8; /* Đặt độ mờ cho bảng */
         }
         th, td {
             border: 1px solid black;
@@ -39,47 +57,67 @@
         }
     </style>
     <script>
+        let currentCellA7 = ''; // Biến lưu giá trị hiện tại của A7
+        let currentCellB7 = ''; // Biến lưu giá trị hiện tại của B7
+    
         function initClient() {
             gapi.client.init({
                 'apiKey': 'AIzaSyANdbEb_R9E-tXldeDDoMTRfFX54NECou4',
                 'discoveryDocs': ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
             }).then(function() {
-                readCells();
+                checkForUpdates(); // Bắt đầu kiểm tra khi khởi tạo xong
             });
         }
-
+    
         function handleClientLoad() {
             gapi.load('client', initClient);
         }
-
+    
         function readCells() {
             const params = {
                 spreadsheetId: '1DS0UweAQC4GMUbH7y9HuX5wlx_mKxrDTBCWDGs7cN4Y',
-                range: 'Sheet2!A7:B7', // Chỉ định phạm vi bao gồm A7 và B7
+                range: 'Sheet2!A7:B7',
             };
-
+    
             gapi.client.sheets.spreadsheets.values.get(params).then((response) => {
                 const values = response.result.values[0];
                 const cellA7 = values[0];
                 const cellB7 = values[1];
-                document.getElementById('cellA7').innerText = cellA7;
-                document.getElementById('cellB7').innerText = cellB7;
+    
+                // Kiểm tra nếu dữ liệu A7 hoặc B7 đã thay đổi
+                if (cellA7 !== currentCellA7 || cellB7 !== currentCellB7) {
+                    // Cập nhật giá trị mới
+                    document.getElementById('cellA7').innerText = cellA7;
+                    document.getElementById('cellB7').innerText = cellB7;
+    
+                    // Lưu lại giá trị hiện tại
+                    currentCellA7 = cellA7;
+                    currentCellB7 = cellB7;
+                }
             }, (reason) => {
                 console.error('Error: ' + reason.result.error.message);
             });
         }
-        // Hàm reload trang mỗi 15 giây
-        function reloadPage() {
+    
+        // Hàm kiểm tra cập nhật định kỳ
+        function checkForUpdates() {
             setInterval(function() {
-                location.reload();
-            }, 15000); // 15000 milliseconds = 15 seconds
+                readCells(); // Đọc dữ liệu mỗi lần kiểm tra
+            }, 5000); // Kiểm tra mỗi 5 giây
         }
     </script>
+    
 </head>
-<body onload="handleClientLoad(); reloadPage();">
+<body onload="handleClientLoad()">
+
+
+    <div class="background"></div>
     <div class="container">
         <table>
             <thead>
+                <tr>
+                    <th colspan="2">Nhiệt độ điểm đo</th>
+                </tr>
                 <tr>
                     <th> Nhiệt độ (℃) </th>
                     <th> Độ ẩm (%) </th>
