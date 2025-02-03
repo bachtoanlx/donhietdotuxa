@@ -1,114 +1,103 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="icon" href="https://icons.iconarchive.com/icons/bokehlicia/captiva/48/cloud-icon.png">
-
-    <title>Weather measuring Tool</title>
-    <script src="https://apis.google.com/js/api.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dữ liệu thời tiết</title>
+    
     <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: Arial, sans-serif;
-            overflow: hidden;
-        }
-        .background {
+        /* Nhúng trang thời tiết làm nền */
+        .weather-background {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('https://st.quantrimang.com/photos/image/2019/10/30/hinh-nen-phong-canh-dep-3.jpg') no-repeat center center fixed; /* Thay thế 'your-image-url.jpg' bằng URL của ảnh nền */
-            background-size: cover;
-            filter: blur(1px); /* Làm mờ ảnh nền */
-            z-index: -1; /* Đặt ảnh nền ở phía sau nội dung */
+            border: none;
+            z-index: -1; /* Đưa iframe xuống dưới */
         }
+
+        /* Container chứa bảng dữ liệu */
         .container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            width: 70%;
-            z-index: 1;
+            position: relative;
+            background: rgba(255, 255, 255, 0.85); /* Nền trắng mờ */
+            padding: 5px;
+            border-radius:5px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+            width: 400px;
+            margin: 100px auto;
+            text-align: center;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
-            opacity: 0.8; /* Đặt độ mờ cho bảng */
         }
+
         th, td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: center;
+            border: 1px solid #ddd;
+            padding: 10px;
         }
+
         th {
-            background-color: #f2f2f2;
-        }
-        th:nth-child(1), td:nth-child(1) {
-            width: 300px; /* Đặt chiều rộng cho cột A7 */
-        }
-        th:nth-child(2), td:nth-child(2) {
-            width: 300px; /* Đặt chiều rộng cho cột B7 */
+            background: #007bff;
+            color: white;
         }
     </style>
+    
+    <!-- Nạp API Google Sheets -->
+    <script src="https://apis.google.com/js/api.js"></script>
     <script>
-let currentValues = {}; // Biến lưu giá trị hiện tại của các ô
+        let currentData = {}; // Lưu trữ giá trị hiện tại
 
-function initClient() {
-    gapi.client.init({
-        'apiKey': 'AIzaSyANdbEb_R9E-tXldeDDoMTRfFX54NECou4',
-        'discoveryDocs': ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
-    }).then(() => {
-        checkForUpdates(); // Kiểm tra cập nhật khi khởi tạo xong
-    });
-}
-
-function handleClientLoad() {
-    gapi.load('client', initClient);
-}
-
-// Hàm đọc dữ liệu từ ô cụ thể trong Google Sheets
-function readCell(cellRange, elementId) {
-    const params = {
-        spreadsheetId: '1DS0UweAQC4GMUbH7y9HuX5wlx_mKxrDTBCWDGs7cN4Y',
-        range: `Sheet2!${cellRange}`,
-    };
-
-    gapi.client.sheets.spreadsheets.values.get(params).then((response) => {
-        const value = response.result.values ? response.result.values[0][0] : 'Không có dữ liệu';
-
-        // Kiểm tra nếu dữ liệu đã thay đổi thì mới cập nhật giao diện
-        if (currentValues[cellRange] !== value) {
-            document.getElementById(elementId).innerText = value;
-            currentValues[cellRange] = value; // Cập nhật giá trị mới
+        function initClient() {
+            gapi.client.init({
+                'apiKey': 'AIzaSyANdbEb_R9E-tXldeDDoMTRfFX54NECou4',
+                'discoveryDocs': ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
+            }).then(() => {
+                checkForUpdates(); // Bắt đầu kiểm tra dữ liệu
+            });
         }
-    }, (reason) => {
-        console.error('Lỗi: ' + reason.result.error.message);
-    });
-}
 
-// Hàm kiểm tra và cập nhật định kỳ
-function checkForUpdates() {
-    setInterval(() => {
-        readCell('I9', 'cellI9');  // Lấy thời gian
-        readCell('A7', 'cellA7');  // Lấy nhiệt độ
-        readCell('B7', 'cellB7');  // Lấy độ ẩm
-        readCell('D10', 'cellD10'); // Lấy Min day
-        readCell('E10', 'cellE10'); // Lấy Max day
-    }, 5000); // Kiểm tra mỗi 5 giây
-}
-</script>
+        function handleClientLoad() {
+            gapi.load('client', initClient);
+        }
 
-    
-    
+        function readCell(cellId, cellRange) {
+            const params = {
+                spreadsheetId: '1DS0UweAQC4GMUbH7y9HuX5wlx_mKxrDTBCWDGs7cN4Y',
+                range: `Sheet2!${cellRange}`
+            };
+
+            gapi.client.sheets.spreadsheets.values.get(params).then((response) => {
+                const value = response.result.values ? response.result.values[0][0] : "N/A";
+                if (value !== currentData[cellId]) {
+                    document.getElementById(cellId).innerText = value;
+                    currentData[cellId] = value;
+                }
+            }, (error) => {
+                console.error(`Lỗi khi lấy dữ liệu ô ${cellRange}:`, error.result.error.message);
+            });
+        }
+
+        function checkForUpdates() {
+            setInterval(() => {
+                readCell("I9", "I9");
+                readCell("A7", "A7");
+                readCell("B7", "B7");
+                readCell("D10", "D10");
+                readCell("E10", "E10");
+            }, 5000);
+        }
+    </script>
 </head>
 <body onload="handleClientLoad()">
-    <div class="background"></div>
+
+    <!-- Nhúng trang thời tiết từ Windy -->
+    <iframe class="weather-background" 
+        src="https://embed.windy.com/embed2.html?lat=10.762622&lon=106.660172&zoom=5&level=surface&overlay=wind&menu=true&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=true&detailLat=10.762622&detailLon=106.660172&metricWind=default&metricTemp=default&radarRange=-1">
+    </iframe>
+
     <div class="container">
         <table>
             <thead>
@@ -117,7 +106,7 @@ function checkForUpdates() {
                 </tr>
                 <tr>
                     <th>Thời gian:</th>
-                    <td id="cellI9">Loading...</td>
+                    <th id="I9">Loading...</th>
                 </tr>
                 <tr>
                     <th>Nhiệt độ (℃)</th>
@@ -126,20 +115,20 @@ function checkForUpdates() {
             </thead>
             <tbody>
                 <tr>
-                    <td id="cellA7">Loading...</td>
-                    <td id="cellB7">Loading...</td>
+                    <td id="A7">Loading...</td>
+                    <td id="B7">Loading...</td>
                 </tr>
                 <tr>
                     <th>Min day (℃)</th>
                     <th>Max day (℃)</th>
                 </tr>
                 <tr>
-                    <td id="cellD10">Loading...</td>
-                    <td id="cellE10">Loading...</td>
+                    <td id="D10">Loading...</td>
+                    <td id="E10">Loading...</td>
                 </tr>
             </tbody>
         </table>
     </div>
-</body>
 
+</body>
 </html>
