@@ -57,70 +57,71 @@
         }
     </style>
     <script>
-        let currentCellA7 = ''; // Biến lưu giá trị hiện tại của A7
-        let currentCellB7 = ''; // Biến lưu giá trị hiện tại của B7
-    
-        function initClient() {
-            gapi.client.init({
-                'apiKey': 'AIzaSyANdbEb_R9E-tXldeDDoMTRfFX54NECou4',
-                'discoveryDocs': ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
-            }).then(function() {
-                checkForUpdates(); // Bắt đầu kiểm tra khi khởi tạo xong
-            });
+let currentValues = {}; // Biến lưu giá trị hiện tại của các ô
+
+function initClient() {
+    gapi.client.init({
+        'apiKey': 'AIzaSyANdbEb_R9E-tXldeDDoMTRfFX54NECou4',
+        'discoveryDocs': ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
+    }).then(() => {
+        checkForUpdates(); // Kiểm tra cập nhật khi khởi tạo xong
+    });
+}
+
+function handleClientLoad() {
+    gapi.load('client', initClient);
+}
+
+// Hàm đọc dữ liệu từ ô cụ thể trong Google Sheets
+function readCell(cellRange, elementId) {
+    const params = {
+        spreadsheetId: '1DS0UweAQC4GMUbH7y9HuX5wlx_mKxrDTBCWDGs7cN4Y',
+        range: `Sheet2!${cellRange}`,
+    };
+
+    gapi.client.sheets.spreadsheets.values.get(params).then((response) => {
+        const value = response.result.values ? response.result.values[0][0] : 'Không có dữ liệu';
+
+        // Kiểm tra nếu dữ liệu đã thay đổi thì mới cập nhật giao diện
+        if (currentValues[cellRange] !== value) {
+            document.getElementById(elementId).innerText = value;
+            currentValues[cellRange] = value; // Cập nhật giá trị mới
         }
+    }, (reason) => {
+        console.error('Lỗi: ' + reason.result.error.message);
+    });
+}
+
+// Hàm kiểm tra và cập nhật định kỳ
+function checkForUpdates() {
+    setInterval(() => {
+        readCell('I9', 'cellI9');  // Lấy thời gian
+        readCell('A7', 'cellA7');  // Lấy nhiệt độ
+        readCell('B7', 'cellB7');  // Lấy độ ẩm
+        readCell('D10', 'cellD10'); // Lấy Min day
+        readCell('E10', 'cellE10'); // Lấy Max day
+    }, 5000); // Kiểm tra mỗi 5 giây
+}
+</script>
+
     
-        function handleClientLoad() {
-            gapi.load('client', initClient);
-        }
-    
-        function readCells() {
-            const params = {
-                spreadsheetId: '1DS0UweAQC4GMUbH7y9HuX5wlx_mKxrDTBCWDGs7cN4Y',
-                range: 'Sheet2!A7:B7',
-            };
-    
-            gapi.client.sheets.spreadsheets.values.get(params).then((response) => {
-                const values = response.result.values[0];
-                const cellA7 = values[0];
-                const cellB7 = values[1];
-    
-                // Kiểm tra nếu dữ liệu A7 hoặc B7 đã thay đổi
-                if (cellA7 !== currentCellA7 || cellB7 !== currentCellB7) {
-                    // Cập nhật giá trị mới
-                    document.getElementById('cellA7').innerText = cellA7;
-                    document.getElementById('cellB7').innerText = cellB7;
-    
-                    // Lưu lại giá trị hiện tại
-                    currentCellA7 = cellA7;
-                    currentCellB7 = cellB7;
-                }
-            }, (reason) => {
-                console.error('Error: ' + reason.result.error.message);
-            });
-        }
-    
-        // Hàm kiểm tra cập nhật định kỳ
-        function checkForUpdates() {
-            setInterval(function() {
-                readCells(); // Đọc dữ liệu mỗi lần kiểm tra
-            }, 5000); // Kiểm tra mỗi 5 giây
-        }
-    </script>
     
 </head>
 <body onload="handleClientLoad()">
-
-
     <div class="background"></div>
     <div class="container">
         <table>
             <thead>
                 <tr>
-                    <th colspan="2">Nhiệt độ điểm đo</th>
+                    <th colspan="2">NHIỆT ẨM KẾ ONLINE</th>
                 </tr>
                 <tr>
-                    <th> Nhiệt độ (℃) </th>
-                    <th> Độ ẩm (%) </th>
+                    <th>Thời gian:</th>
+                    <td id="cellI9">Loading...</td>
+                </tr>
+                <tr>
+                    <th>Nhiệt độ (℃)</th>
+                    <th>Độ ẩm (%)</th>
                 </tr>
             </thead>
             <tbody>
@@ -128,8 +129,17 @@
                     <td id="cellA7">Loading...</td>
                     <td id="cellB7">Loading...</td>
                 </tr>
+                <tr>
+                    <th>Min day (℃)</th>
+                    <th>Max day (℃)</th>
+                </tr>
+                <tr>
+                    <td id="cellD10">Loading...</td>
+                    <td id="cellE10">Loading...</td>
+                </tr>
             </tbody>
         </table>
     </div>
 </body>
+
 </html>
