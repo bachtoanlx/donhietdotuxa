@@ -6,7 +6,6 @@
     <title>Dữ liệu thời tiết</title>
     
     <style>
-        /* Nhúng trang thời tiết làm nền */
         .weather-background {
             position: fixed;
             top: 0;
@@ -14,21 +13,22 @@
             width: 100%;
             height: 100%;
             border: none;
-            z-index: -1; /* Đưa iframe xuống dưới */
+            z-index: -1;
         }
 
-        /* Container chứa bảng dữ liệu */
         .container {
-            width: 80%;  /* Chiếm 80% chiều rộng màn hình */
-            max-width: 600px;  /* Giới hạn tối đa */
+            margin: 100px auto; /* Canh giữa màn hình */
+            left: 0;
+            top: 100px;
+            width: 80%;
+            max-width: 600px;
             background: rgba(255, 255, 255, 0.85);
             padding: 5px;
             border-radius: 5px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-            margin: 100px auto; /* Canh giữa màn hình */
             text-align: center;
+            transition: transform 0.5s;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
@@ -43,8 +43,25 @@
             background: #007bff;
             color: white;
         }
+
+        .hidden {
+            transform: translateX(-200%);
+        }
+
+        .toggle-btn {
+            position: fixed;
+            right: 10px;
+            top: 100px;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 20px;
+            z-index: 10;
+        }
     </style>
-    
     <!-- Nạp API Google Sheets -->
     <script src="https://apis.google.com/js/api.js"></script>
     <script>
@@ -91,18 +108,20 @@
         }
     </script>
 </head>
-<body onload="handleClientLoad()">
-
-    <!-- Nhúng trang thời tiết từ Windy -->
+<body>
     <iframe class="weather-background" 
         src="https://embed.windy.com/embed2.html?lat=10.762622&lon=106.660172&zoom=5&level=surface&overlay=wind&menu=true&message=true&marker=true&calendar=now&pressure=true&type=map&location=coordinates&detail=true&detailLat=10.762622&detailLon=106.660172&metricWind=default&metricTemp=default&radarRange=-1">
     </iframe>
 
-    <div class="container">
+    <button class="toggle-btn" onclick="toggleTable()">H☰</button>
+    
+    <div class="container" id="dataTable">
         <table>
             <thead>
                 <tr>
-                    <th colspan="2" style="font-size: 18px; font-weight: bold; text-transform: uppercase; padding: 15px; background-color: #ffcc00; color: #333;">NHIỆT ẨM KẾ ONLINE</th> 
+                    <th colspan="2" style="font-size: 18px; font-weight: bold; text-transform: uppercase; padding: 15px; background-color: #ffcc00; color: #333;">
+                        NHIỆT ẨM KẾ ONLINE
+                    </th>                    
                 </tr>
                 <tr>
                     <th>Thời gian:</th>
@@ -130,5 +149,10 @@
         </table>
     </div>
 
+    <script>
+        function toggleTable() {
+            document.getElementById("dataTable").classList.toggle("hidden");
+        }
+    </script>
 </body>
 </html>
